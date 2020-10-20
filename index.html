@@ -1,0 +1,1311 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+      <title>Model Adaptation Techniques for Few-shot On-device Voice Cloning</title>
+      <link rel="stylesheet" type="text/css" href="stylesheet.css"/>
+      <!-- <link rel="shortcut icon" href="../../images/taco.png"> -->
+      <script>
+         function play(path) {{
+           var player = document.getElementById('player');
+           player.src = path;
+           player.play();
+         }}
+      </script>
+      <style>
+         .audio-cell {
+         /* Center audio widgets in the table cell. */
+         text-align: center;
+         padding-bottom: 1px;
+         padding-top: 1px;
+         }
+         .audio-cell-padded {
+         text-align: center;
+         padding-bottom: 10px;
+         padding-top: 10px;
+         }
+         .audio-header {
+         /* Don't wrap header text. */
+         white-space: nowrap;
+         /* Some breaking space between headers for readability. */
+         padding-right: 5px;
+         padding-left: 5px;
+         }
+         .reference-cell {
+         /* For uniformity and to wrap long reference text, limit the reference cell's width. */
+         width: 25%;
+         padding-top: 20px;
+         padding-bottom: 20px;
+         }
+         .sample audio {
+         vertical-align: middle;
+         padding-left: 3px;
+         padding-right: 3px;
+         }
+         .round-button {
+         box-sizing: border-box;
+         display:block;
+         width:30px;
+         height:30px;
+         padding-top: 8px;
+         padding-left: 3px;
+         line-height: 6px;
+         border: 1.2px solid #000;
+         border-radius: 50%;
+         color: #000;
+         text-align:center;
+         background-color: rgba(0,0,0,0.00);
+         font-size:6px;
+         box-shadow: 0px 0px 2px rgba(0,0,0,1);
+         transition: all 0.2s ease;
+         }
+         .round-button:hover {
+         background-color: rgba(0,0,0,0.0);
+         box-shadow: 0px 0px 4px rgba(0,0,0,1);
+         }
+         .round-button:active {
+         background-color: rgba(0,0,0,0.01);
+         box-shadow: 0px 0px 1px rgba(0,0,0,1);
+         }
+      </style>
+   </head>
+   <body>
+     <div class="main">
+       <article>
+         <header>
+            <h1>Model Adaptation Techniques for Few-shot On-device Voice Cloning</h1>
+         </header>
+      </article>
+      <div>
+         <p><b>Authors:</b> Tasnima Sadekova, Vadim Popov, Dmitriy Polubotko, Vladimir Gogoryan, Ivan Vovk, Mikhail Kudinov</p>
+      </div>
+      <div>
+      <p><b>Abstract:</b> Recent advances in neural text-to-speech allowed to build multi-speaker systems capable of performing high-fidelity speech generation. However, it is often desirable to be able to add a new voice to a text-to-speech system based on only a few recordings. Unfortunately, this is still a challenging problem for modern neural TTS solutions. In this work we study several approaches to design of on-device voice cloning. Starting from a multi-speaker TTS system we improve its quality for a target speaker either by fine-tuning feature generation module on a small speech sample or by using a GAN-based post-filter. We also compare performance of an autoregressive feature generation module based on Tacotron2 with a parallel solution based on Glow-TTS. We show that GAN-based post-filtering improves quality of a baseline zero-shot TTS system and demonstrate that a TTS system of a good quality can be obtained using only 1 minute of adaptation data with no more than 1.2k iterations of SGD proving feasibility of on-device voice cloning.</a></p>
+      
+      <h3>1. Different adaptation techniques for VC</h3>
+      <h4>Synthesized texts:</h4>
+      <table style="margin-left:auto;margin-right:auto;">
+         <tbody>
+            <tr>
+               <td nowrap>Example 1:</td>
+               <td><span class="text_e2e">"Different telescope designs perform differently and have different strengths and weaknesses."</span></td>
+            </tr>
+            <tr></tr>
+            <tr></tr>
+            <tr></tr>
+            <tr></tr>
+            <tr>
+               <td nowrap>Example 2:</td>
+               <td><span class="text_e2e">"We have the means to help ourselves."</span></td>
+            </tr>
+         </tbody>
+      </table>
+
+      <h4>Adam:</h4>
+<table style="margin-left:auto;margin-right:auto;">
+         <tbody>
+            <tr>
+               <td nowrap>Ground truth</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/adam/ground_truth.wav">
+                  </audio>
+               </td>
+            </tr>
+
+            <tr>
+               <td nowrap><span class="text_e2e">Model</span></td>
+               <td><span class="text_e2e">Example 1</span></td>
+               <td><span class="text_e2e">Example 2</span></td>
+            </tr>
+
+            <tr>
+               <td nowrap>taco-fsl-libritts+vctk</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/adam/taco-fsl-libritts+vctk_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/adam/taco-fsl-libritts+vctk_1.wav">
+                  </audio>
+               </td>
+            </tr>
+
+            <tr>
+               <td nowrap>glow-fsl-libritts</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/adam/glow-fsl-libritts_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/adam/glow-fsl-libritts_1.wav">
+                  </audio>
+               </td>
+            </tr>
+
+            <tr>
+               <td nowrap>taco-base-zsl-librispeech</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/adam/taco-base-zsl-librispeech_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/adam/taco-base-zsl-librispeech_1.wav">
+                  </audio>
+               </td>
+            </tr>
+            
+            <tr>
+               <td nowrap>taco-zsl-libritts+vctk</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/adam/taco-zsl-libritts+vctk_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/adam/taco-zsl-libritts+vctk_1.wav">
+                  </audio>
+               </td>
+            </tr>
+
+            <tr>
+               <td nowrap>taco-gan-zsl-librispeech</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/adam/taco-gan-zsl-librispeech_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/adam/taco-gan-zsl-librispeech_1.wav">
+                  </audio>
+               </td>
+            </tr>
+            
+            <tr>
+               <td nowrap>glow-zsl-libritts</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/adam/glow-zsl-libritts_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/adam/glow-zsl-libritts_1.wav">
+                  </audio>
+               </td>
+            </tr>
+         </tbody>
+      </table>
+
+
+      <h4>Amanda:</h4>
+      <table style="margin-left:auto;margin-right:auto;">
+         <tbody>
+            <tr>
+               <td nowrap>Ground truth</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/amanda/ground_truth.wav">
+                  </audio>
+               </td>
+            </tr>
+
+            <tr>
+               <td nowrap><span class="text_e2e">Model</span></td>
+               <td><span class="text_e2e">Example 1</span></td>
+               <td><span class="text_e2e">Example 2</span></td>
+            </tr>
+
+            <tr>
+               <td nowrap>taco-fsl-libritts+vctk</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/amanda/taco-fsl-libritts+vctk_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/amanda/taco-fsl-libritts+vctk_1.wav">
+                  </audio>
+               </td>
+            </tr>
+
+            <tr>
+               <td nowrap>glow-fsl-libritts</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/amanda/glow-fsl-libritts_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/amanda/glow-fsl-libritts_1.wav">
+                  </audio>
+               </td>
+            </tr>
+
+            <tr>
+               <td nowrap>taco-base-zsl-librispeech</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/amanda/taco-base-zsl-librispeech_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/amanda/taco-base-zsl-librispeech_1.wav">
+                  </audio>
+               </td>
+            </tr>
+            
+            <tr>
+               <td nowrap>taco-zsl-libritts+vctk</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/amanda/taco-zsl-libritts+vctk_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/amanda/taco-zsl-libritts+vctk_1.wav">
+                  </audio>
+               </td>
+            </tr>
+
+            <tr>
+               <td nowrap>taco-gan-zsl-librispeech</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/amanda/taco-gan-zsl-librispeech_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/amanda/taco-gan-zsl-librispeech_1.wav">
+                  </audio>
+               </td>
+            </tr>
+            
+            <tr>
+               <td nowrap>glow-zsl-libritts</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/amanda/glow-zsl-libritts_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/amanda/glow-zsl-libritts_1.wav">
+                  </audio>
+               </td>
+            </tr>
+         </tbody>
+      </table>
+      
+
+      <h4>Donald:</h4>
+      <table style="margin-left:auto;margin-right:auto;">
+         <tbody>
+            <tr>
+               <td nowrap>Ground truth</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/donald/ground_truth.wav">
+                  </audio>
+               </td>
+            </tr>
+
+            <tr>
+               <td nowrap><span class="text_e2e">Model</span></td>
+               <td><span class="text_e2e">Example 1</span></td>
+               <td><span class="text_e2e">Example 2</span></td>
+            </tr>
+
+            <tr>
+               <td nowrap>taco-fsl-libritts+vctk</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/donald/taco-fsl-libritts+vctk_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/donald/taco-fsl-libritts+vctk_1.wav">
+                  </audio>
+               </td>
+            </tr>
+
+            <tr>
+               <td nowrap>glow-fsl-libritts</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/donald/glow-fsl-libritts_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/donald/glow-fsl-libritts_1.wav">
+                  </audio>
+               </td>
+            </tr>
+
+            <tr>
+               <td nowrap>taco-base-zsl-librispeech</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/donald/taco-base-zsl-librispeech_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/donald/taco-base-zsl-librispeech_1.wav">
+                  </audio>
+               </td>
+            </tr>
+            
+            <tr>
+               <td nowrap>taco-zsl-libritts+vctk</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/donald/taco-zsl-libritts+vctk_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/donald/taco-zsl-libritts+vctk_1.wav">
+                  </audio>
+               </td>
+            </tr>
+
+            <tr>
+               <td nowrap>taco-gan-zsl-librispeech</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/donald/taco-gan-zsl-librispeech_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/donald/taco-gan-zsl-librispeech_1.wav">
+                  </audio>
+               </td>
+            </tr>
+            
+            <tr>
+               <td nowrap>glow-zsl-libritts</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/donald/glow-zsl-libritts_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/donald/glow-zsl-libritts_1.wav">
+                  </audio>
+               </td>
+            </tr>
+         </tbody>
+      </table>
+      
+
+      <h4>John:</h4>
+      <table style="margin-left:auto;margin-right:auto;">
+         <tbody>
+            <tr>
+               <td nowrap>Ground truth</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/john/ground_truth.wav">
+                  </audio>
+               </td>
+            </tr>
+
+            <tr>
+               <td nowrap><span class="text_e2e">Model</span></td>
+               <td><span class="text_e2e">Example 1</span></td>
+               <td><span class="text_e2e">Example 2</span></td>
+            </tr>
+
+            <tr>
+               <td nowrap>taco-fsl-libritts+vctk</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/john/taco-fsl-libritts+vctk_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/john/taco-fsl-libritts+vctk_1.wav">
+                  </audio>
+               </td>
+            </tr>
+
+            <tr>
+               <td nowrap>glow-fsl-libritts</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/john/glow-fsl-libritts_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/john/glow-fsl-libritts_1.wav">
+                  </audio>
+               </td>
+            </tr>
+
+            <tr>
+               <td nowrap>taco-base-zsl-librispeech</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/john/taco-base-zsl-librispeech_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/john/taco-base-zsl-librispeech_1.wav">
+                  </audio>
+               </td>
+            </tr>
+            
+            <tr>
+               <td nowrap>taco-zsl-libritts+vctk</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/john/taco-zsl-libritts+vctk_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/john/taco-zsl-libritts+vctk_1.wav">
+                  </audio>
+               </td>
+            </tr>
+
+            <tr>
+               <td nowrap>taco-gan-zsl-librispeech</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/john/taco-gan-zsl-librispeech_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/john/taco-gan-zsl-librispeech_1.wav">
+                  </audio>
+               </td>
+            </tr>
+            
+            <tr>
+               <td nowrap>glow-zsl-libritts</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/john/glow-zsl-libritts_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/john/glow-zsl-libritts_1.wav">
+                  </audio>
+               </td>
+            </tr>
+         </tbody>
+      </table>
+
+
+
+      <h4>Kristin:</h4>
+      <table style="margin-left:auto;margin-right:auto;">
+         <tbody>
+            <tr>
+               <td nowrap>Ground truth</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/kristin/ground_truth.wav">
+                  </audio>
+               </td>
+            </tr>
+
+            <tr>
+               <td nowrap><span class="text_e2e">Model</span></td>
+               <td><span class="text_e2e">Example 1</span></td>
+               <td><span class="text_e2e">Example 2</span></td>
+            </tr>
+
+            <tr>
+               <td nowrap>taco-fsl-libritts+vctk</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/kristin/taco-fsl-libritts+vctk_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/kristin/taco-fsl-libritts+vctk_1.wav">
+                  </audio>
+               </td>
+            </tr>
+
+            <tr>
+               <td nowrap>glow-fsl-libritts</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/kristin/glow-fsl-libritts_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/kristin/glow-fsl-libritts_1.wav">
+                  </audio>
+               </td>
+            </tr>
+
+            <tr>
+               <td nowrap>taco-base-zsl-librispeech</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/kristin/taco-base-zsl-librispeech_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/kristin/taco-base-zsl-librispeech_1.wav">
+                  </audio>
+               </td>
+            </tr>
+            
+            <tr>
+               <td nowrap>taco-zsl-libritts+vctk</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/kristin/taco-zsl-libritts+vctk_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/kristin/taco-zsl-libritts+vctk_1.wav">
+                  </audio>
+               </td>
+            </tr>
+
+            <tr>
+               <td nowrap>taco-gan-zsl-librispeech</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/kristin/taco-gan-zsl-librispeech_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/kristin/taco-gan-zsl-librispeech_1.wav">
+                  </audio>
+               </td>
+            </tr>
+            
+            <tr>
+               <td nowrap>glow-zsl-libritts</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/kristin/glow-zsl-libritts_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/kristin/glow-zsl-libritts_1.wav">
+                  </audio>
+               </td>
+            </tr>
+         </tbody>
+      </table>
+
+
+
+      <h4>Larry:</h4>
+      <table style="margin-left:auto;margin-right:auto;">
+         <tbody>
+            <tr>
+               <td nowrap>Ground truth</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/larry/ground_truth.wav">
+                  </audio>
+               </td>
+            </tr>
+
+            <tr>
+               <td nowrap><span class="text_e2e">Model</span></td>
+               <td><span class="text_e2e">Example 1</span></td>
+               <td><span class="text_e2e">Example 2</span></td>
+            </tr>
+
+            <tr>
+               <td nowrap>taco-fsl-libritts+vctk</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/larry/taco-fsl-libritts+vctk_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/larry/taco-fsl-libritts+vctk_1.wav">
+                  </audio>
+               </td>
+            </tr>
+
+            <tr>
+               <td nowrap>glow-fsl-libritts</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/larry/glow-fsl-libritts_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/larry/glow-fsl-libritts_1.wav">
+                  </audio>
+               </td>
+            </tr>
+
+            <tr>
+               <td nowrap>taco-base-zsl-librispeech</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/larry/taco-base-zsl-librispeech_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/larry/taco-base-zsl-librispeech_1.wav">
+                  </audio>
+               </td>
+            </tr>
+            
+            <tr>
+               <td nowrap>taco-zsl-libritts+vctk</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/larry/taco-zsl-libritts+vctk_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/larry/taco-zsl-libritts+vctk_1.wav">
+                  </audio>
+               </td>
+            </tr>
+
+            <tr>
+               <td nowrap>taco-gan-zsl-librispeech</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/larry/taco-gan-zsl-librispeech_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/larry/taco-gan-zsl-librispeech_1.wav">
+                  </audio>
+               </td>
+            </tr>
+            
+            <tr>
+               <td nowrap>glow-zsl-libritts</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/larry/glow-zsl-libritts_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/larry/glow-zsl-libritts_1.wav">
+                  </audio>
+               </td>
+            </tr>
+         </tbody>
+      </table>
+
+
+
+      <h4>Nancy:</h4>
+      <table style="margin-left:auto;margin-right:auto;">
+         <tbody>
+            <tr>
+               <td nowrap>Ground truth</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/nancy/ground_truth.wav">
+                  </audio>
+               </td>
+            </tr>
+
+            <tr>
+               <td nowrap><span class="text_e2e">Model</span></td>
+               <td><span class="text_e2e">Example 1</span></td>
+               <td><span class="text_e2e">Example 2</span></td>
+            </tr>
+
+            <tr>
+               <td nowrap>taco-fsl-libritts+vctk</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/nancy/taco-fsl-libritts+vctk_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/nancy/taco-fsl-libritts+vctk_1.wav">
+                  </audio>
+               </td>
+            </tr>
+
+            <tr>
+               <td nowrap>glow-fsl-libritts</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/nancy/glow-fsl-libritts_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/nancy/glow-fsl-libritts_1.wav">
+                  </audio>
+               </td>
+            </tr>
+
+            <tr>
+               <td nowrap>taco-base-zsl-librispeech</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/nancy/taco-base-zsl-librispeech_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/nancy/taco-base-zsl-librispeech_1.wav">
+                  </audio>
+               </td>
+            </tr>
+            
+            <tr>
+               <td nowrap>taco-zsl-libritts+vctk</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/nancy/taco-zsl-libritts+vctk_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/nancy/taco-zsl-libritts+vctk_1.wav">
+                  </audio>
+               </td>
+            </tr>
+
+            <tr>
+               <td nowrap>taco-gan-zsl-librispeech</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/nancy/taco-gan-zsl-librispeech_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/nancy/taco-gan-zsl-librispeech_1.wav">
+                  </audio>
+               </td>
+            </tr>
+            
+            <tr>
+               <td nowrap>glow-zsl-libritts</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/nancy/glow-zsl-libritts_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/nancy/glow-zsl-libritts_1.wav">
+                  </audio>
+               </td>
+            </tr>
+         </tbody>
+      </table>
+
+
+
+      <h4>Scarlett:</h4>
+      <table style="margin-left:auto;margin-right:auto;">
+         <tbody>
+            <tr>
+               <td nowrap>Ground truth</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/scarlett/ground_truth.wav">
+                  </audio>
+               </td>
+            </tr>
+
+            <tr>
+               <td nowrap><span class="text_e2e">Model</span></td>
+               <td><span class="text_e2e">Example 1</span></td>
+               <td><span class="text_e2e">Example 2</span></td>
+            </tr>
+
+            <tr>
+               <td nowrap>taco-fsl-libritts+vctk</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/scarlett/taco-fsl-libritts+vctk_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/scarlett/taco-fsl-libritts+vctk_1.wav">
+                  </audio>
+               </td>
+            </tr>
+
+            <tr>
+               <td nowrap>glow-fsl-libritts</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/scarlett/glow-fsl-libritts_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/scarlett/glow-fsl-libritts_1.wav">
+                  </audio>
+               </td>
+            </tr>
+
+            <tr>
+               <td nowrap>taco-base-zsl-librispeech</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/scarlett/taco-base-zsl-librispeech_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/scarlett/taco-base-zsl-librispeech_1.wav">
+                  </audio>
+               </td>
+            </tr>
+            
+            <tr>
+               <td nowrap>taco-zsl-libritts+vctk</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/scarlett/taco-zsl-libritts+vctk_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/scarlett/taco-zsl-libritts+vctk_1.wav">
+                  </audio>
+               </td>
+            </tr>
+
+            <tr>
+               <td nowrap>taco-gan-zsl-librispeech</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/scarlett/taco-gan-zsl-librispeech_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/scarlett/taco-gan-zsl-librispeech_1.wav">
+                  </audio>
+               </td>
+            </tr>
+            
+            <tr>
+               <td nowrap>glow-zsl-libritts</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/scarlett/glow-zsl-libritts_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/scarlett/glow-zsl-libritts_1.wav">
+                  </audio>
+               </td>
+            </tr>
+         </tbody>
+      </table>
+
+
+
+      <h4>p280:</h4>
+      <table style="margin-left:auto;margin-right:auto;">
+         <tbody>
+            <tr>
+               <td nowrap>Ground truth</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/p280/ground_truth.wav">
+                  </audio>
+               </td>
+            </tr>
+
+            <tr>
+               <td nowrap><span class="text_e2e">Model</span></td>
+               <td><span class="text_e2e">Example 1</span></td>
+               <td><span class="text_e2e">Example 2</span></td>
+            </tr>
+
+            <tr>
+               <td nowrap>taco-fsl-libritts+vctk</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/p280/taco-fsl-libritts+vctk_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/p280/taco-fsl-libritts+vctk_1.wav">
+                  </audio>
+               </td>
+            </tr>
+
+            <tr>
+               <td nowrap>glow-fsl-libritts</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/p280/glow-fsl-libritts_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/p280/glow-fsl-libritts_1.wav">
+                  </audio>
+               </td>
+            </tr>
+
+            <tr>
+               <td nowrap>taco-base-zsl-librispeech</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/p280/taco-base-zsl-librispeech_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/p280/taco-base-zsl-librispeech_1.wav">
+                  </audio>
+               </td>
+            </tr>
+            
+            <tr>
+               <td nowrap>taco-zsl-libritts+vctk</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/p280/taco-zsl-libritts+vctk_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/p280/taco-zsl-libritts+vctk_1.wav">
+                  </audio>
+               </td>
+            </tr>
+
+            <tr>
+               <td nowrap>taco-gan-zsl-librispeech</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/p280/taco-gan-zsl-librispeech_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/p280/taco-gan-zsl-librispeech_1.wav">
+                  </audio>
+               </td>
+            </tr>
+            
+            <tr>
+               <td nowrap>glow-zsl-libritts</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/p280/glow-zsl-libritts_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/p280/glow-zsl-libritts_1.wav">
+                  </audio>
+               </td>
+            </tr>
+         </tbody>
+      </table>
+
+
+      <h4>p315:</h4>
+      <table style="margin-left:auto;margin-right:auto;">
+         <tbody>
+            <tr>
+               <td nowrap>Ground truth</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/p315/ground_truth.wav">
+                  </audio>
+               </td>
+            </tr>
+
+            <tr>
+               <td nowrap><span class="text_e2e">Model</span></td>
+               <td><span class="text_e2e">Example 1</span></td>
+               <td><span class="text_e2e">Example 2</span></td>
+            </tr>
+
+            <tr>
+               <td nowrap>taco-fsl-libritts+vctk</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/p315/taco-fsl-libritts+vctk_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/p315/taco-fsl-libritts+vctk_1.wav">
+                  </audio>
+               </td>
+            </tr>
+
+            <tr>
+               <td nowrap>glow-fsl-libritts</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/p315/glow-fsl-libritts_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/p315/glow-fsl-libritts_1.wav">
+                  </audio>
+               </td>
+            </tr>
+
+            <tr>
+               <td nowrap>taco-base-zsl-librispeech</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/p315/taco-base-zsl-librispeech_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/p315/taco-base-zsl-librispeech_1.wav">
+                  </audio>
+               </td>
+            </tr>
+            
+            <tr>
+               <td nowrap>taco-zsl-libritts+vctk</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/p315/taco-zsl-libritts+vctk_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/p315/taco-zsl-libritts+vctk_1.wav">
+                  </audio>
+               </td>
+            </tr>
+
+            <tr>
+               <td nowrap>taco-gan-zsl-librispeech</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/p315/taco-gan-zsl-librispeech_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/p315/taco-gan-zsl-librispeech_1.wav">
+                  </audio>
+               </td>
+            </tr>
+            
+            <tr>
+               <td nowrap>glow-zsl-libritts</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/p315/glow-zsl-libritts_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-samples/p315/glow-zsl-libritts_1.wav">
+                  </audio>
+               </td>
+            </tr>
+         </tbody>
+      </table>
+         
+
+
+      
+      <h3>2. Comparison of our best model with a single-speaker TTS</h3>
+      <h4>Synthesized texts:</h4>
+      <table style="margin-left:auto;margin-right:auto;">
+         <tbody>
+            <tr>
+               <td nowrap>Example 1:</td>
+               <td><span class="text_e2e">"Learn about setting up wireless network configuration."</span></td>
+            </tr>
+            <tr></tr>
+            <tr></tr>
+            <tr></tr>
+            <tr></tr>
+            <tr></tr>
+            <tr></tr>
+            <tr></tr>
+            <tr>
+               <td nowrap>Example 2:</td>
+               <td><span class="text_e2e">"The large items are put into containers for disposal."</span></td>
+            </tr>
+            <tr></tr>
+            <tr></tr>
+            <tr></tr>
+            <tr></tr>
+            <tr>
+               <td nowrap>Example 3:</td>
+               <td><span class="text_e2e">"I should be obliged to take time, sir, before I could give you an answer <br> worthy of you acceptance: a present has many faces to it, has it not?"</span></td>
+            </tr>
+         </tbody>
+      </table>
+      <h4>Elliot:</h4>
+      <table style="margin-left:auto;margin-right:auto;">
+         <tbody>
+            <tr>
+               <td nowrap>Ground truth</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-vs-single-speaker/elliot/ground_truth.wav">
+                  </audio>
+               </td>
+            </tr>
+
+            <tr>
+               <td nowrap><span class="text_e2e">Model</span></td>
+               <td><span class="text_e2e">Example 1</span></td>
+               <td><span class="text_e2e">Example 2</span></td>
+               <td><span class="text_e2e">Example 3</span></td>
+            </tr>
+
+            <tr>
+               <td nowrap>Single-speaker</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-vs-single-speaker/elliot/ss_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-vs-single-speaker/elliot/ss_1.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-vs-single-speaker/elliot/ss_2.wav">
+                  </audio>
+               </td>
+            </tr>
+
+            <tr>
+               <td nowrap>Our VC model</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-vs-single-speaker/elliot/vc_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-vs-single-speaker/elliot/vc_1.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-vs-single-speaker/elliot/vc_2.wav">
+                  </audio>
+               </td>
+            </tr>
+         </tbody>
+      </table>
+
+
+      
+      <h4>Nancy:</h4>
+      <table style="margin-left:auto;margin-right:auto;">
+         <tbody>
+            <tr>
+               <td nowrap>Ground truth</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-vs-single-speaker/nancy/ground_truth.wav">
+                  </audio>
+               </td>
+            </tr>
+            
+            <tr>
+               <td nowrap><span class="text_e2e">Model</span></td>
+               <td><span class="text_e2e">Example 1</span></td>
+               <td><span class="text_e2e">Example 2</span></td>
+               <td><span class="text_e2e">Example 3</span></td>
+            </tr>
+            
+            <tr>
+               <td nowrap>Single-speaker</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-vs-single-speaker/nancy/ss_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-vs-single-speaker/nancy/ss_1.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-vs-single-speaker/nancy/ss_2.wav">
+                  </audio>
+               </td>
+            </tr>
+
+            <tr>
+               <td nowrap>Our VC model</td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-vs-single-speaker/nancy/vc_0.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-vs-single-speaker/nancy/vc_1.wav">
+                  </audio>
+               </td>
+               <td>
+                  <audio controls="">
+                     <source src="wavs/vc-vs-single-speaker/nancy/vc_2.wav">
+                  </audio>
+               </td>
+            </tr>
+         </tbody>
+      </table>
+
+      </div>
+   </body>
+</html>
