@@ -1,6 +1,6 @@
 # fsvc-on-device.github.io
 
-## Model Adaptation Techniques for Few-shot On-device Voice Cloning
+## Efficient Strategies of Few-shot On-device Voice Cloning
 
 **Authors**: Tasnima Sadekova, Vadim Popov, Dmitriy Polubotko, Vladimir Gogoryan, Ivan Vovk, Mikhail Kudinov
 
