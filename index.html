@@ -81,7 +81,7 @@
       <div>
       <p><b>Abstract:</b> Recent advances in neural text-to-speech allowed to build multi-speaker systems capable of performing high-fidelity speech generation. However, it is often desirable to be able to add a new voice to a text-to-speech system based on only a few recordings. Unfortunately, this is still a challenging problem for modern neural TTS solutions. In this work we study several approaches to design of on-device voice cloning. Starting from a multi-speaker TTS system we improve its quality for a target speaker either by fine-tuning feature generation module on a small speech sample or by using a GAN-based post-filter. We also compare performance of an autoregressive feature generation module based on Tacotron2 with a parallel solution based on Glow-TTS. We show that GAN-based post-filtering improves quality of a baseline zero-shot TTS system and demonstrate that a TTS system of a good quality can be obtained using only 1 minute of adaptation data with no more than 1.2k iterations of SGD proving feasibility of on-device voice cloning.</p>
       
-      <h3>1. Different adaptation techniques for VC</h3>
+      <h3>1. Different VC techniques</h3>
       <h4>Synthesized texts:</h4>
       <table style="margin-left:auto;margin-right:auto;">
          <tbody>
@@ -149,7 +149,7 @@
             </tr>
 
             <tr>
-               <td nowrap>taco-base-zsl-librispeech</td>
+               <td nowrap>taco-zsl-base-librispeech</td>
                <td>
                   <audio controls="">
                      <source src="wavs/vc-samples/adam/taco-base-zsl-librispeech_0.wav">
@@ -177,7 +177,7 @@
             </tr>
 
             <tr>
-               <td nowrap>taco-gan-zsl-librispeech</td>
+               <td nowrap>taco-zsl-gan-librispeech</td>
                <td>
                   <audio controls="">
                      <source src="wavs/vc-samples/adam/taco-gan-zsl-librispeech_0.wav">
@@ -254,7 +254,7 @@
             </tr>
 
             <tr>
-               <td nowrap>taco-base-zsl-librispeech</td>
+               <td nowrap>taco-zsl-base-librispeech</td>
                <td>
                   <audio controls="">
                      <source src="wavs/vc-samples/amanda/taco-base-zsl-librispeech_0.wav">
@@ -282,7 +282,7 @@
             </tr>
 
             <tr>
-               <td nowrap>taco-gan-zsl-librispeech</td>
+               <td nowrap>taco-zsl-gan-librispeech</td>
                <td>
                   <audio controls="">
                      <source src="wavs/vc-samples/amanda/taco-gan-zsl-librispeech_0.wav">
@@ -359,7 +359,7 @@
             </tr>
 
             <tr>
-               <td nowrap>taco-base-zsl-librispeech</td>
+               <td nowrap>taco-zsl-base-librispeech</td>
                <td>
                   <audio controls="">
                      <source src="wavs/vc-samples/donald/taco-base-zsl-librispeech_0.wav">
@@ -387,7 +387,7 @@
             </tr>
 
             <tr>
-               <td nowrap>taco-gan-zsl-librispeech</td>
+               <td nowrap>taco-zsl-gan-librispeech</td>
                <td>
                   <audio controls="">
                      <source src="wavs/vc-samples/donald/taco-gan-zsl-librispeech_0.wav">
@@ -464,7 +464,7 @@
             </tr>
 
             <tr>
-               <td nowrap>taco-base-zsl-librispeech</td>
+               <td nowrap>taco-zsl-base-librispeech</td>
                <td>
                   <audio controls="">
                      <source src="wavs/vc-samples/john/taco-base-zsl-librispeech_0.wav">
@@ -492,7 +492,7 @@
             </tr>
 
             <tr>
-               <td nowrap>taco-gan-zsl-librispeech</td>
+               <td nowrap>taco-zsl-gan-librispeech</td>
                <td>
                   <audio controls="">
                      <source src="wavs/vc-samples/john/taco-gan-zsl-librispeech_0.wav">
@@ -570,7 +570,7 @@
             </tr>
 
             <tr>
-               <td nowrap>taco-base-zsl-librispeech</td>
+               <td nowrap>taco-zsl-base-librispeech</td>
                <td>
                   <audio controls="">
                      <source src="wavs/vc-samples/kristin/taco-base-zsl-librispeech_0.wav">
@@ -598,7 +598,7 @@
             </tr>
 
             <tr>
-               <td nowrap>taco-gan-zsl-librispeech</td>
+               <td nowrap>taco-zsl-gan-librispeech</td>
                <td>
                   <audio controls="">
                      <source src="wavs/vc-samples/kristin/taco-gan-zsl-librispeech_0.wav">
@@ -676,7 +676,7 @@
             </tr>
 
             <tr>
-               <td nowrap>taco-base-zsl-librispeech</td>
+               <td nowrap>taco-zsl-base-librispeech</td>
                <td>
                   <audio controls="">
                      <source src="wavs/vc-samples/larry/taco-base-zsl-librispeech_0.wav">
@@ -704,7 +704,7 @@
             </tr>
 
             <tr>
-               <td nowrap>taco-gan-zsl-librispeech</td>
+               <td nowrap>taco-zsl-gan-librispeech</td>
                <td>
                   <audio controls="">
                      <source src="wavs/vc-samples/larry/taco-gan-zsl-librispeech_0.wav">
@@ -782,7 +782,7 @@
             </tr>
 
             <tr>
-               <td nowrap>taco-base-zsl-librispeech</td>
+               <td nowrap>taco-zsl-base-librispeech</td>
                <td>
                   <audio controls="">
                      <source src="wavs/vc-samples/nancy/taco-base-zsl-librispeech_0.wav">
@@ -810,7 +810,7 @@
             </tr>
 
             <tr>
-               <td nowrap>taco-gan-zsl-librispeech</td>
+               <td nowrap>taco-zsl-gan-librispeech</td>
                <td>
                   <audio controls="">
                      <source src="wavs/vc-samples/nancy/taco-gan-zsl-librispeech_0.wav">
@@ -888,7 +888,7 @@
             </tr>
 
             <tr>
-               <td nowrap>taco-base-zsl-librispeech</td>
+               <td nowrap>taco-zsl-base-librispeech</td>
                <td>
                   <audio controls="">
                      <source src="wavs/vc-samples/scarlett/taco-base-zsl-librispeech_0.wav">
@@ -916,7 +916,7 @@
             </tr>
 
             <tr>
-               <td nowrap>taco-gan-zsl-librispeech</td>
+               <td nowrap>taco-zsl-gan-librispeech</td>
                <td>
                   <audio controls="">
                      <source src="wavs/vc-samples/scarlett/taco-gan-zsl-librispeech_0.wav">
@@ -994,7 +994,7 @@
             </tr>
 
             <tr>
-               <td nowrap>taco-base-zsl-librispeech</td>
+               <td nowrap>taco-zsl-base-librispeech</td>
                <td>
                   <audio controls="">
                      <source src="wavs/vc-samples/p280/taco-base-zsl-librispeech_0.wav">
@@ -1022,7 +1022,7 @@
             </tr>
 
             <tr>
-               <td nowrap>taco-gan-zsl-librispeech</td>
+               <td nowrap>taco-zsl-gan-librispeech</td>
                <td>
                   <audio controls="">
                      <source src="wavs/vc-samples/p280/taco-gan-zsl-librispeech_0.wav">
@@ -1099,7 +1099,7 @@
             </tr>
 
             <tr>
-               <td nowrap>taco-base-zsl-librispeech</td>
+               <td nowrap>taco-zsl-base-librispeech</td>
                <td>
                   <audio controls="">
                      <source src="wavs/vc-samples/p315/taco-base-zsl-librispeech_0.wav">
@@ -1127,7 +1127,7 @@
             </tr>
 
             <tr>
-               <td nowrap>taco-gan-zsl-librispeech</td>
+               <td nowrap>taco-zsl-gan-librispeech</td>
                <td>
                   <audio controls="">
                      <source src="wavs/vc-samples/p315/taco-gan-zsl-librispeech_0.wav">
